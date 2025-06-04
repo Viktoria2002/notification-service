@@ -1,0 +1,108 @@
+version: '3.8'
+services:
+
+  notification-service:
+    image: ${AND_DOCKER_REGISTRY_NAME}/${PROJECT}/${APP}:${CI_COMMIT_BRANCH}
+    container_name: ${APP}-${CI_COMMIT_BRANCH}
+    restart: always
+    ports:
+      - "9897:8080"
+    networks:
+      - mrn-network
+    depends_on:
+      - database
+
+  database:
+    image: postgres:14.7
+    container_name: ${APP}-${CI_COMMIT_BRANCH}-database
+    ports:
+      - "5008:5432"
+    restart: always
+    environment:
+      POSTGRES_DB: notification_service_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - postgres-notification-service:/var/lib/postgresql/data
+    networks:
+      - mrn-network
+
+  elasticsearch:
+    image: elasticsearch:7.10.1
+    container_name: elasticsearch
+    depends_on:
+      - notification-service
+    environment:
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - xpack.security.enabled=false
+    volumes:
+      - ./var/lib/elasticsearch:/usr/share/elasticsearch/data
+    ports:
+      - 9300:9300
+      - 9200:9200
+    networks:
+      - mrn-network
+
+  kibana:
+    image: kibana:7.10.1
+    container_name: kibana
+    environment:
+      ELASTICSEARCH_URL: "http://elasticsearch:9200"
+      ELASTICSEARCH_HOSTS: '["http://elasticsearch:9200"]'
+    depends_on:
+      - elasticsearch
+    ports:
+      - 5601:5601
+    networks:
+      - mrn-network
+
+  logstash:
+    image: logstash:7.10.1
+    container_name: logstash
+    volumes:
+      - ./elk/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./elk/pipeline:/usr/share/logstash/pipeline:ro
+    ports:
+      - "5044:5044"
+      - "5000:5000/tcp"
+      - "5000:5000/udp"
+      - "9600:9600"
+    environment:
+      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+    depends_on:
+      - elasticsearch
+    networks:
+      - mrn-network
+
+  zookeeper:
+    image: docker.io/bitnami/zookeeper:3.9
+    restart: always
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    networks:
+      - mrn-network
+
+  kafka:
+    image: docker.io/bitnami/kafka:3.4
+    restart: always
+    ports:
+      - "9092:9092"
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_MESSAGE_MAX_BYTES=1205725956
+    depends_on:
+      - zookeeper
+    networks:
+      - mrn-network
+
+volumes:
+  postgres-notification-service:
+    name: postgres-notification-service
+
+networks:
+  mrn-network:
+    name: mrn-network

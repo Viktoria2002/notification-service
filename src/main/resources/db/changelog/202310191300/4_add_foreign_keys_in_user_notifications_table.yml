@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 4_add_foreign_keys_in_user_notifications_table
+      author: vika
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: notification_profile_id
+            baseTableName: user_notifications
+            constraintName: fk_user_notifications_notification_profile
+            referencedColumnNames: notification_profile_id
+            referencedTableName: notification_profile
+        - addForeignKeyConstraint:
+            baseColumnNames: notification_id
+            baseTableName: user_notifications
+            constraintName: fk_user_notifications_notifications
+            referencedColumnNames: notification_id
+            referencedTableName: notifications

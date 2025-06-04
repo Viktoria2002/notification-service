@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: update_notification_profile_table_default_values
+      author: vika
+      changes:
+        - addDefaultValue:
+            columnName: sms_notification
+            defaultValueBoolean: false
+            tableName: notification_profile
+        - addDefaultValue:
+            columnName: push_notification
+            defaultValueBoolean: true
+            tableName: notification_profile
+        - addDefaultValue:
+            columnName: email_notification
+            defaultValueBoolean: false
+            tableName: notification_profile

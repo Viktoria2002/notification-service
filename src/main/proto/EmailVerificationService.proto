@@ -1,0 +1,15 @@
+syntax = "proto3";
+package ru.aston.EmailVerificationService;
+
+message verificationRequest {
+  string email = 1;
+  string url = 2;
+}
+
+message verificationResponse {
+  bool verified = 1;
+}
+
+service EmailVerificationService {
+  rpc verifyEmail(verificationRequest) returns (verificationResponse);
+}

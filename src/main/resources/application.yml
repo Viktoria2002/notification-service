@@ -1,0 +1,151 @@
+server:
+  port: 9897
+
+grpc:
+  port: 6565
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://172.17.1.59:8093/eureka/
+
+spring:
+  application:
+    name: notification-service
+  profiles:
+    active: local
+
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://database:5432/notification_service_db
+    username: postgres
+    password: postgres
+
+  liquibase:
+    change-log: db/changelog/liquibase-master.yml
+
+  mail:
+    create-deposit-subject: "Создание депозита"
+    close-deposit-subject: "Закрытие депозита"
+    renewal-deposit-subject: "Продление депозита"
+    verification-subject: "Подтверждение email"
+    approve-credit-subject: "Одобрение кредита"
+    credit-payment-done: "Оплата кредита произведена"
+    credit-created: "Кредит успешно создан"
+    application-status-changed: "Статус заявки изменен"
+    close-credit-subject: "Закрытие кредита"
+    application-rejected: "Заявка отклонена"
+    change-account-status: "Статус счета изменен"
+    application-withdrawn: "Заявка отозвана клиентом"
+    deposit-application-accepted: "Принята заявка на открытие депозита"
+    host: smtp.gmail.com
+    port: 587
+    #    гугл акк
+    #    testsmrn@gmail.com     testPassword123
+    username: testsmrn@gmail.com
+    password: imbktmbprezamprm
+    properties:
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+  kafka:
+    consumer:
+      bootstrap-servers: kafka:9092
+      group-id: credit-group
+      enable-auto-commit: true
+      key-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.ErrorHandlingDeserializer
+      properties:
+        spring.json.trusted.packages: ru.aston.kafkadtolibrary.dto.request.*
+        spring.deserializer.key.delegate.class: org.apache.kafka.common.serialization.StringDeserializer
+      topics:
+        close-credit-topic: "close-credit"
+        approve-credit-topic: "approve-credit"
+        application-rejected-topic: "application-rejected"
+        change-account-status-topic: "change-account-status"
+        credit-payment-done-topic: "credit-payment-done"
+        credit-created-topic: "credit-created"
+        application-withdrawn-by-client-topic: "application-withdrawn-by-client"
+        change-application-status-topic: "changed-application-status"
+        renewal-deposit-topic: "renewal-deposit"
+        close-deposit-topic: "close-deposit"
+        deposit-application-accepted-topic: "deposit-application-accepted"
+        create-deposit-topic: "create-deposit"
+        partitions: 3
+        replicas: 1
+
+kafka:
+  retry:
+    retry-interval-ms: 5000
+    retry-max-attempts: 3
+  listener1:
+    enabled: true
+    properties: |-
+      spring.deserializer.value.delegate.class = ru.aston.notificationservice.kafka.deserializer.CustomDeserializer
+      record-filter-strategy = ru.aston.notificationservice.kafka.filer.DeserializationRecordFilter
+      spring.kafka.consumer.max-poll-records = 1000
+  listener2:
+    enabled: true
+    properties: |-
+      spring.deserializer.value.delegate.class = org.springframework.kafka.support.serializer.JsonDeserializer
+  listener3:
+    enabled: true
+    properties: |-
+      spring.deserializer.value.delegate.class = org.springframework.kafka.support.serializer.JsonDeserializer
+  listener4:
+    enabled: true
+    properties: |-
+      spring.deserializer.value.delegate.class = org.springframework.kafka.support.serializer.JsonDeserializer
+  listener5:
+    enabled: true
+    properties: |-
+      spring.deserializer.value.delegate.class = org.springframework.kafka.support.serializer.JsonDeserializer
+  listener6:
+    enabled: true
+    properties: |-
+      spring.deserializer.value.delegate.class = org.springframework.kafka.support.serializer.JsonDeserializer
+  listener7:
+    enabled: true
+    properties: |-
+      spring.deserializer.value.delegate.class = org.springframework.kafka.support.serializer.JsonDeserializer
+  closeDepositListener:
+    group-id: deposit-group
+    enabled: true
+    properties: |-
+      spring.deserializer.value.delegate.class = org.springframework.kafka.support.serializer.JsonDeserializer
+  renewalDepositListener:
+    group-id: deposit-group
+    enabled: true
+    properties: |-
+      spring.deserializer.value.delegate.class = org.springframework.kafka.support.serializer.JsonDeserializer
+  createDepositListener:
+    group-id: deposit-group
+    enabled: true
+    properties: |-
+      spring.deserializer.value.delegate.class = org.springframework.kafka.support.serializer.JsonDeserializer
+  depositApplicationAcceptedListener:
+    group-id: deposit-group
+    enabled: true
+    properties: |-
+      spring.deserializer.value.delegate.class = org.springframework.kafka.support.serializer.JsonDeserializer
+
+
+
+springdoc:
+
+  swagger-ui:
+    path: /swagger-ui
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+  zipkin:
+    tracing:
+      endpoint: http://zipkin:9411/api/v2/spans

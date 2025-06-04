@@ -1,0 +1,57 @@
+databaseChangeLog:
+  - changeSet:
+      id: 2_create_notifications_table
+      author: vika
+      changes:
+        - createTable:
+            tableName: notifications
+            columns:
+              - column:
+                  name: notification_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_notifications
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: notification_type
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: notification_header
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: notification_small_body
+                  type: VARCHAR(70)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: notification_full_body
+                  type: VARCHAR(255)
+              - column:
+                  name: foreign_link
+                  type: VARCHAR(255)
+              - column:
+                  name: created_date
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_by
+                  type: VARCHAR(255)
+              - column:
+                  name: last_modified_date
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: last_modified_by
+                  type: VARCHAR(255)

@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 3_create_user_notifications_table
+      author: vika
+      changes:
+        - createTable:
+            tableName: user_notifications
+            columns:
+              - column:
+                  name: notification_profile_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: notification_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+        - addPrimaryKey:
+            tableName: user_notifications
+            clustered: true
+            columnNames: notification_profile_id, notification_id
+            constraintName: pk_user_notifications
